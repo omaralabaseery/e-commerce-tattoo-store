@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: tattoo_db
+    environment:
+      POSTGRES_DB: tattoo_store
+      POSTGRES_USER: tattoo
+      POSTGRES_PASSWORD: tattoo
+    ports:
+      - "5432:5432"
+    volumes:
+      - tattoo_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tattoo -d tattoo_store"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: tattoo_backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/tattoo_store
+      SPRING_DATASOURCE_USERNAME: tattoo
+      SPRING_DATASOURCE_PASSWORD: tattoo
+      APP_JWT_SECRET: change-me-in-production-this-must-be-at-least-256-bits-long-secret
+      APP_CORS_ORIGINS: http://localhost:3000
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    container_name: tattoo_frontend
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8080
+    ports:
+      - "3000:3000"
+
+volumes:
+  tattoo_pgdata:
