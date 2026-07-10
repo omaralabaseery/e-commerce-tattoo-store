@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import { products as mockProducts } from "@/data/mock";
 import type { Product } from "@/lib/types";
@@ -41,16 +41,23 @@ function toProduct(p: ApiSummary): Product {
 export default function SearchPage() {
   const [q, setQ] = useState("");
   const [apiResults, setApiResults] = useState<Product[] | null>(null);
+  const requestSeq = useRef(0);
 
   useEffect(() => {
     if (!apiEnabled) return;
+    const seq = ++requestSeq.current;
     const t = setTimeout(() => {
       const query = q.trim()
         ? `/api/products?search=${encodeURIComponent(q.trim())}&page=0&size=48`
         : "/api/products?page=0&size=48";
       api<{ content: ApiSummary[] }>(query)
-        .then((res) => setApiResults(res.content.map(toProduct)))
-        .catch(() => setApiResults(null));
+        // ignore out-of-order responses from older queries
+        .then((res) => {
+          if (seq === requestSeq.current) setApiResults(res.content.map(toProduct));
+        })
+        .catch(() => {
+          if (seq === requestSeq.current) setApiResults([]);
+        });
     }, 250);
     return () => clearTimeout(t);
   }, [q]);

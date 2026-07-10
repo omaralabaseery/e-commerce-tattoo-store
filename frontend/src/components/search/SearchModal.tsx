@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Search, CornerDownLeft } from "lucide-react";
@@ -24,6 +24,7 @@ interface ApiSummary {
 export function SearchModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Product[]>([]);
+  const requestSeq = useRef(0);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -53,11 +54,14 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
     }
 
     // debounce live search against the API
+    const seq = ++requestSeq.current;
     const t = setTimeout(() => {
       api<{ content: ApiSummary[] }>(
         `/api/products?search=${encodeURIComponent(q)}&page=0&size=6`
       )
-        .then((res) =>
+        .then((res) => {
+          // ignore out-of-order responses from older queries
+          if (seq !== requestSeq.current) return;
           setResults(
             res.content.map((p) => ({
               id: p.id,
@@ -70,9 +74,11 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
               rating: 0,
               images: p.imageUrl ? [imageSrc(p.imageUrl)] : [],
             }))
-          )
-        )
-        .catch(() => setResults([]));
+          );
+        })
+        .catch(() => {
+          if (seq === requestSeq.current) setResults([]);
+        });
     }, 250);
     return () => clearTimeout(t);
   }, [query]);

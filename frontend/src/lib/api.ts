@@ -49,6 +49,18 @@ export function storeTokens(accessToken: string | null, refreshToken: string | n
   else localStorage.removeItem("refreshToken");
 }
 
+/** True when the JWT's exp claim is in the past (with a 10s safety margin). */
+function isExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(
+      atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
+    );
+    return typeof payload.exp === "number" && payload.exp * 1000 < Date.now() + 10_000;
+  } catch {
+    return false;
+  }
+}
+
 // Refresh tokens are single-use on the backend, so concurrent 401s must share
 // one rotation instead of racing each other with the same (soon-revoked) token.
 let refreshInFlight: Promise<string | null> | null = null;
@@ -98,7 +110,13 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   };
 
   if (options.auth) {
-    const { accessToken } = readTokens();
+    let { accessToken } = readTokens();
+    // Proactive refresh: endpoints like POST /api/orders are permitAll, so an
+    // expired token is silently ignored server-side instead of returning 401 —
+    // the order would be created as a guest order. Refresh before sending.
+    if (accessToken && isExpired(accessToken)) {
+      accessToken = (await tryRefresh()) ?? null;
+    }
     if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
   }
 
