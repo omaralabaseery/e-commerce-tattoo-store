@@ -66,6 +66,12 @@
            duration-300 ease-premium;
   }
 
+  /* form control used across admin forms */
+  .input {
+    @apply h-11 w-full rounded-xl border border-line bg-paper px-3 text-sm outline-none
+           transition-colors focus:border-ink;
+  }
+
   .badge {
     @apply inline-flex items-center rounded-full border border-line bg-paper px-2.5 py-1
            text-[11px] font-medium uppercase tracking-wide text-muted;

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Search, Heart, ShoppingBag, User, Menu, X } from "lucide-react";
 import { categories } from "@/data/mock";
 import { useCart } from "@/lib/store";
+import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { SearchModal } from "@/components/search/SearchModal";
 
@@ -14,6 +15,11 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const count = useCart((s) => s.count());
   const openCart = useCart((s) => s.open);
+  const user = useAuth((s) => s.user);
+  // avoid SSR/client hydration mismatch: only trust persisted auth state after mount
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const signedIn = mounted && Boolean(user);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -83,8 +89,8 @@ export function Header() {
               <Heart className="h-5 w-5" />
             </Link>
             <Link
-              href="/account"
-              aria-label="Account"
+              href={signedIn ? "/account" : "/login"}
+              aria-label={signedIn ? "Account" : "Sign in"}
               className="hidden h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-mist sm:flex"
             >
               <User className="h-5 w-5" />

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, CreditCard, Banknote, Smartphone, Wallet } from "lucide-react";
 import { useCart } from "@/lib/store";
+import { api, apiEnabled } from "@/lib/api";
 import { formatPrice, cn } from "@/lib/utils";
 import type { PaymentMethod } from "@/lib/types";
 
@@ -20,15 +21,84 @@ const PAYMENTS: { id: PaymentMethod; label: string; icon: typeof CreditCard }[] 
   { id: "COD", label: "Cash on Delivery", icon: Banknote },
 ];
 
+const emptyAddress = {
+  fullName: "",
+  phone: "",
+  email: "",
+  city: "",
+  area: "",
+  block: "",
+  street: "",
+  building: "",
+  apartment: "",
+};
+
 export function CheckoutClient() {
   const { items, subtotal: subtotalFn, clear } = useCart();
   const subtotal = subtotalFn();
   const [step, setStep] = useState(0);
   const [payment, setPayment] = useState<PaymentMethod>("KNET");
   const [placed, setPlaced] = useState(false);
+  const [orderNumber, setOrderNumber] = useState<string | null>(null);
+  const [address, setAddress] = useState(emptyAddress);
+  const [placing, setPlacing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const stepIndex = step;
   const total = subtotal + (items.length ? DELIVERY_FEE : 0);
+
+  const setAddr = (key: keyof typeof emptyAddress) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setAddress((a) => ({ ...a, [key]: e.target.value }));
+
+  async function placeOrder() {
+    setError(null);
+
+    if (!apiEnabled) {
+      clear();
+      setPlaced(true);
+      return;
+    }
+
+    if (!address.fullName.trim() || !address.phone.trim()) {
+      setError("Please fill in your name and phone number in the Address step.");
+      setStep(0);
+      return;
+    }
+
+    setPlacing(true);
+    try {
+      const deliveryAddress = [
+        address.city && `City: ${address.city}`,
+        address.area && `Area: ${address.area}`,
+        address.block && `Block: ${address.block}`,
+        address.street && `Street: ${address.street}`,
+        address.building && `Building: ${address.building}`,
+        address.apartment && `Apartment: ${address.apartment}`,
+      ]
+        .filter(Boolean)
+        .join(", ");
+
+      const res = await api<{ orderNumber: string }>("/api/orders", {
+        method: "POST",
+        body: JSON.stringify({
+          customerName: address.fullName,
+          customerPhone: address.phone,
+          customerEmail: address.email || null,
+          paymentMethod: payment,
+          notes: deliveryAddress ? `Delivery address — ${deliveryAddress}` : null,
+          items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+        }),
+        auth: true,
+      });
+      setOrderNumber(res.orderNumber);
+      clear();
+      setPlaced(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to place the order. Please try again.");
+    } finally {
+      setPlacing(false);
+    }
+  }
 
   if (placed) {
     return (
@@ -37,6 +107,11 @@ export function CheckoutClient() {
           <Check className="h-8 w-8" />
         </div>
         <h1 className="mt-6 text-2xl font-semibold">Order placed</h1>
+        {orderNumber && (
+          <p className="mt-2 text-sm font-medium">
+            Order number: <span className="font-semibold">{orderNumber}</span>
+          </p>
+        )}
         <p className="mt-2 max-w-sm text-sm text-muted">
           Thank you. A confirmation has been sent and you can track your order from your account.
         </p>
@@ -95,14 +170,15 @@ export function CheckoutClient() {
             >
               {STEPS[step] === "Address" && (
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="Full name" full />
-                  <Field label="Phone" />
-                  <Field label="City" />
-                  <Field label="Area" />
-                  <Field label="Block" />
-                  <Field label="Street" />
-                  <Field label="Building" />
-                  <Field label="Apartment" />
+                  <Field label="Full name" full value={address.fullName} onChange={setAddr("fullName")} />
+                  <Field label="Phone" value={address.phone} onChange={setAddr("phone")} />
+                  <Field label="Email (optional)" value={address.email} onChange={setAddr("email")} />
+                  <Field label="City" value={address.city} onChange={setAddr("city")} />
+                  <Field label="Area" value={address.area} onChange={setAddr("area")} />
+                  <Field label="Block" value={address.block} onChange={setAddr("block")} />
+                  <Field label="Street" value={address.street} onChange={setAddr("street")} />
+                  <Field label="Building" value={address.building} onChange={setAddr("building")} />
+                  <Field label="Apartment" value={address.apartment} onChange={setAddr("apartment")} />
                 </div>
               )}
 
@@ -152,6 +228,10 @@ export function CheckoutClient() {
             </motion.div>
           </AnimatePresence>
 
+          {error && (
+            <p className="mt-6 rounded-xl border border-line bg-mist px-4 py-3 text-sm">{error}</p>
+          )}
+
           <div className="mt-8 flex justify-between">
             <button
               onClick={() => setStep((s) => Math.max(0, s - 1))}
@@ -164,10 +244,11 @@ export function CheckoutClient() {
               <button onClick={() => setStep((s) => s + 1)} className="btn-primary">Continue</button>
             ) : (
               <button
-                onClick={() => { clear(); setPlaced(true); }}
-                className="btn-primary"
+                onClick={placeOrder}
+                disabled={placing}
+                className="btn-primary disabled:opacity-60"
               >
-                Place Order
+                {placing ? "Placing order…" : "Place Order"}
               </button>
             )}
           </div>
@@ -192,11 +273,18 @@ export function CheckoutClient() {
   );
 }
 
-function Field({ label, full }: { label: string; full?: boolean }) {
+function Field({
+  label,
+  full,
+  ...props
+}: { label: string; full?: boolean } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <label className={cn("flex flex-col gap-1.5 text-sm", full && "sm:col-span-2")}>
       <span className="text-muted">{label}</span>
-      <input className="h-11 rounded-xl border border-line px-3 outline-none transition-colors focus:border-ink" />
+      <input
+        {...props}
+        className="h-11 rounded-xl border border-line px-3 outline-none transition-colors focus:border-ink"
+      />
     </label>
   );
 }

@@ -2,12 +2,13 @@ services:
   db:
     image: postgres:16-alpine
     container_name: tattoo_db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: tattoo_store
       POSTGRES_USER: tattoo
-      POSTGRES_PASSWORD: tattoo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tattoo}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - tattoo_pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -19,27 +20,37 @@ services:
   backend:
     build: ./backend
     container_name: tattoo_backend
+    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/tattoo_store
       SPRING_DATASOURCE_USERNAME: tattoo
-      SPRING_DATASOURCE_PASSWORD: tattoo
-      APP_JWT_SECRET: change-me-in-production-this-must-be-at-least-256-bits-long-secret
-      APP_CORS_ORIGINS: http://localhost:3000
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-tattoo}
+      APP_JWT_SECRET: ${APP_JWT_SECRET:-change-me-in-production-this-must-be-at-least-256-bits-long-secret}
+      APP_CORS_ORIGINS: ${APP_CORS_ORIGINS:-http://localhost:3000}
+      APP_UPLOADS_DIR: /app/uploads
+    volumes:
+      - tattoo_uploads:/app/uploads
     ports:
       - "8080:8080"
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
     container_name: tattoo_frontend
+    restart: unless-stopped
     depends_on:
       - backend
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8080
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+      API_URL_INTERNAL: http://backend:8080
     ports:
       - "3000:3000"
 
 volumes:
   tattoo_pgdata:
+  tattoo_uploads:

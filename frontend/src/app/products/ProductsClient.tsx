@@ -3,13 +3,21 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { SlidersHorizontal, X } from "lucide-react";
-import { products, categories, brands } from "@/data/mock";
+import type { Product, Category, Brand } from "@/lib/types";
 import { ProductGrid } from "@/components/sections/ProductGrid";
 import { cn } from "@/lib/utils";
 
 type Sort = "featured" | "price_asc" | "price_desc" | "newest" | "rating";
 
-export function ProductsClient() {
+export function ProductsClient({
+  products,
+  categories,
+  brands,
+}: {
+  products: Product[];
+  categories: Category[];
+  brands: Brand[];
+}) {
   const params = useSearchParams();
   const initialCategory = params.get("category") ? Number(params.get("category")) : null;
   const initialSort = (params.get("sort") as Sort) || "featured";
@@ -45,7 +53,7 @@ export function ProductsClient() {
       }
     });
     return list;
-  }, [category, brand, maxPrice, inStock, minRating, sort]);
+  }, [products, category, brand, maxPrice, inStock, minRating, sort]);
 
   const reset = () => {
     setCategory(null);

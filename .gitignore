@@ -27,3 +27,6 @@ Thumbs.db
 
 # Docker
 docker-data/
+
+# Build artifacts
+*.tsbuildinfo

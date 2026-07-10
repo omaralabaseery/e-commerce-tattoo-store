@@ -5,10 +5,16 @@ import { CategoryGrid } from "@/components/sections/CategoryGrid";
 import { ProductRail } from "@/components/sections/ProductRail";
 import { CtaBanner } from "@/components/sections/CtaBanner";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
-import { products, featured, bestSellers } from "@/data/mock";
+import { getFeatured, getNewArrivals, getBestSellers } from "@/lib/catalog";
 
-export default function HomePage() {
-  const newArrivals = [...products].slice(-8).reverse();
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const [bestSellers, featured, newArrivals] = await Promise.all([
+    getBestSellers(),
+    getFeatured(),
+    getNewArrivals(),
+  ]);
 
   return (
     <>

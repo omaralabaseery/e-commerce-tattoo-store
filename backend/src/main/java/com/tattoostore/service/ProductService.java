@@ -164,7 +164,8 @@ public class ProductService {
     }
 
     private ProductSummary toSummary(Product p) {
-        return new ProductSummary(p.getId(), p.getName(), p.getSlug(), p.getPrice(),
+        return new ProductSummary(p.getId(), p.getName(), p.getSlug(),
+                p.getCategoryId(), p.getBrandId(), p.getPrice(),
                 p.getDiscountPrice(), p.getRating(), p.getStockQuantity(),
                 p.getIsFeatured(), primaryImage(p));
     }

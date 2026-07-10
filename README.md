@@ -71,7 +71,19 @@ npm install
 npm run dev                   # http://localhost:3000
 ```
 The frontend ships with mock data so it runs standalone. Set
-`NEXT_PUBLIC_API_URL=http://localhost:8080` in `frontend/.env.local` to hit the real API.
+`NEXT_PUBLIC_API_URL=http://localhost:8080` in `frontend/.env.local` to hit the real API —
+this switches the storefront, search, checkout, auth, and the admin panel to live data.
+
+## Deployment (auto-deploy)
+
+Every push to `main` deploys automatically to the VPS via GitHub Actions —
+see [docs/DEPLOY.md](docs/DEPLOY.md) for the one-time server + secrets setup.
+
+## Product images
+
+Product images are uploaded from **Admin → Products → Add/Edit** and stored on the
+server (`tattoo_uploads` Docker volume, served by the backend under `/uploads/…`).
+Product details, customers, orders, and everything else live in PostgreSQL.
 
 ## Default Seeded Accounts
 

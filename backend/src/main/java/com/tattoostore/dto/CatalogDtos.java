@@ -26,6 +26,7 @@ public final class CatalogDtos {
 
     public record ProductSummary(
             Long id, String name, String slug,
+            Long categoryId, Long brandId,
             BigDecimal price, BigDecimal discountPrice,
             BigDecimal rating, Integer stockQuantity, Boolean isFeatured,
             String imageUrl

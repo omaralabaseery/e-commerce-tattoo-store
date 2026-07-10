@@ -1,17 +1,29 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Search, CornerDownLeft } from "lucide-react";
-import { products } from "@/data/mock";
+import { products as mockProducts } from "@/data/mock";
+import type { Product } from "@/lib/types";
+import { api, apiEnabled, imageSrc } from "@/lib/api";
 import { ProductImage } from "@/components/ui/ProductImage";
 import { formatPrice } from "@/lib/utils";
 
 const POPULAR = ["Cheyenne", "Black Ink", "Cartridges", "Power Supply"];
 
+interface ApiSummary {
+  id: number;
+  name: string;
+  slug: string;
+  price: number;
+  discountPrice?: number | null;
+  imageUrl?: string | null;
+}
+
 export function SearchModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [query, setQuery] = useState("");
+  const [results, setResults] = useState<Product[]>([]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -19,12 +31,50 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  const results = useMemo(() => {
-    if (!query.trim()) return [];
-    const q = query.toLowerCase();
-    return products
-      .filter((p) => p.name.toLowerCase().includes(q) || p.shortDescription?.toLowerCase().includes(q))
-      .slice(0, 6);
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) {
+      setResults([]);
+      return;
+    }
+
+    if (!apiEnabled) {
+      const lower = q.toLowerCase();
+      setResults(
+        mockProducts
+          .filter(
+            (p) =>
+              p.name.toLowerCase().includes(lower) ||
+              p.shortDescription?.toLowerCase().includes(lower)
+          )
+          .slice(0, 6)
+      );
+      return;
+    }
+
+    // debounce live search against the API
+    const t = setTimeout(() => {
+      api<{ content: ApiSummary[] }>(
+        `/api/products?search=${encodeURIComponent(q)}&page=0&size=6`
+      )
+        .then((res) =>
+          setResults(
+            res.content.map((p) => ({
+              id: p.id,
+              name: p.name,
+              slug: p.slug,
+              sku: "",
+              price: p.price,
+              discountPrice: p.discountPrice ?? null,
+              stockQuantity: 0,
+              rating: 0,
+              images: p.imageUrl ? [imageSrc(p.imageUrl)] : [],
+            }))
+          )
+        )
+        .catch(() => setResults([]));
+    }, 250);
+    return () => clearTimeout(t);
   }, [query]);
 
   return (

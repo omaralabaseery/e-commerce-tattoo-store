@@ -35,6 +35,8 @@ app:
     refresh-token-ttl-days: 14
   cors:
     origins: ${APP_CORS_ORIGINS:http://localhost:3000}
+  uploads:
+    dir: ${APP_UPLOADS_DIR:uploads}
   store:
     currency: KWD
     default-delivery-fee: 2.000
