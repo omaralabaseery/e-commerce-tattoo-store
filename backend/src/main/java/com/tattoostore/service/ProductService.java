@@ -87,7 +87,10 @@ public class ProductService {
 
     @Transactional
     public ProductResponse create(ProductRequest req) {
-        Product product = new Product();
+        // builder() applies the @Builder.Default field defaults (rating, limits,
+        // collections) — a plain new Product() leaves them null and violates
+        // the NOT NULL columns on insert
+        Product product = Product.builder().build();
         apply(product, req);
         return toResponse(productRepository.save(product), true);
     }
