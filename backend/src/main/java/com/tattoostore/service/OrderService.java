@@ -21,8 +21,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 
+// Read-only transactions by default so mapping the lazy items collection works
+// with open-in-view disabled; mutators carry their own @Transactional.
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class OrderService {
 
     private static final Set<String> VALID_STATUSES = Set.of(

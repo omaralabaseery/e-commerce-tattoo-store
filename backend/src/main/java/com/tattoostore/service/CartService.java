@@ -19,8 +19,11 @@ import java.util.List;
  * Cart for both authenticated users (by userId) and guests (by session id,
  * supplied via the {@code X-Session-Id} header).
  */
+// Read-only transactions by default so mapping the lazy items collection works
+// with open-in-view disabled; mutators carry their own @Transactional.
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class CartService {
 
     private final CartRepository cartRepository;

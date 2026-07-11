@@ -21,8 +21,12 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+// Class-level read-only transactions keep the Hibernate session open while
+// toSummary/toResponse map the lazy images/attributes collections (open-in-view
+// is disabled); mutating methods override this with their own @Transactional.
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProductService {
 
     private final ProductRepository productRepository;
