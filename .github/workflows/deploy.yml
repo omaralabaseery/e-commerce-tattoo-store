@@ -1,8 +1,9 @@
-name: Deploy to VPS
+name: Deploy to VPS (manual backup)
 
+# Auto-deploy is handled by a cron poller ON the server itself
+# (/home/ubuntu/auto-deploy.sh — checks origin/main every 2 minutes).
+# This workflow is a manual fallback; running it requires the VPS_* secrets.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 concurrency:

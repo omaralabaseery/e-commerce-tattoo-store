@@ -1,8 +1,15 @@
 # Deployment — Auto-deploy to a VPS with Docker Compose
 
-Every push to `main` automatically deploys to the VPS via GitHub Actions
-(`.github/workflows/deploy.yml`): the workflow SSHes into the server, pulls the
-latest code, and rebuilds the containers with `docker compose up -d --build`.
+**Active setup: pull-based auto-deploy on the server.** A cron job on the VPS
+(`/home/ubuntu/auto-deploy.sh`, every 2 minutes, guarded by `flock`) checks
+`origin/main`; when new commits land it runs `git reset --hard origin/main`,
+`docker compose up -d --build`, and prunes old images. Logs:
+`tail -f /home/ubuntu/deploy.log`. No GitHub configuration needed — just push
+to `main` and the server updates itself within ~2 minutes (plus build time).
+
+An alternative GitHub Actions workflow (`.github/workflows/deploy.yml`,
+manual `workflow_dispatch` only) can push a deploy over SSH; it requires the
+`VPS_*` secrets described below.
 
 ## One-time server setup
 
