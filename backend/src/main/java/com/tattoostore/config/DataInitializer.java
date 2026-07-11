@@ -5,6 +5,7 @@ import com.tattoostore.entity.User;
 import com.tattoostore.repository.RoleRepository;
 import com.tattoostore.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,10 @@ import org.springframework.stereotype.Component;
 /**
  * Seeds default users with properly hashed passwords (reference data lives in Flyway).
  * Idempotent: only creates a user if the email is not already present.
+ *
+ * In production, set APP_ADMIN_EMAIL / APP_ADMIN_PASSWORD (via .env) to create
+ * the real admin account. The demo accounts (whose passwords are public in this
+ * repo) are only seeded when no production admin is configured.
  */
 @Component
 @RequiredArgsConstructor
@@ -21,10 +26,20 @@ public class DataInitializer implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${app.admin.email:}")
+    private String adminEmail;
+
+    @Value("${app.admin.password:}")
+    private String adminPassword;
+
     @Override
     public void run(String... args) {
-        seedUser("Store Admin", "admin@tattoostore.com", "Admin@12345", "SUPER_ADMIN", "99000000");
-        seedUser("Sample Customer", "customer@example.com", "Customer@12345", "CUSTOMER", "99111111");
+        if (!adminEmail.isBlank() && !adminPassword.isBlank()) {
+            seedUser("Store Owner", adminEmail, adminPassword, "SUPER_ADMIN", null);
+        } else {
+            seedUser("Store Admin", "admin@tattoostore.com", "Admin@12345", "SUPER_ADMIN", "99000000");
+            seedUser("Sample Customer", "customer@example.com", "Customer@12345", "CUSTOMER", "99111111");
+        }
     }
 
     private void seedUser(String name, String email, String rawPassword, String roleName, String phone) {

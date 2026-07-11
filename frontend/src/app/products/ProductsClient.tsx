@@ -106,7 +106,7 @@ export function ProductsClient({
 
       <div>
         <h3 className="mb-3 text-xs font-medium uppercase tracking-wide text-muted">
-          Max price: {maxPrice} KWD
+          Max price: {maxPrice} EGP
         </h3>
         <input
           type="range"

@@ -10,7 +10,7 @@ export function RevenueChart() {
     <div className="rounded-card border border-line bg-paper p-5 shadow-soft">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-sm font-semibold">Revenue · last 7 days</h3>
-        <span className="text-xs text-muted">KWD</span>
+        <span className="text-xs text-muted">EGP</span>
       </div>
       <ResponsiveContainer width="100%" height={260}>
         <AreaChart data={revenueSeries} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>

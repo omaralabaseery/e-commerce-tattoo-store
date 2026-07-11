@@ -13,7 +13,7 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Total Sales" value={stats.totalSales} suffix=" KWD" decimals={1} />
+        <StatCard label="Total Sales" value={stats.totalSales} suffix=" EGP" decimals={1} />
         <StatCard label="Orders" value={stats.totalOrders} />
         <StatCard label="Customers" value={stats.totalCustomers} />
         <StatCard label="Products" value={stats.totalProducts} />

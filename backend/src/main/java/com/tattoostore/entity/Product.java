@@ -43,6 +43,10 @@ public class Product {
     @Column(name = "discount_price")
     private BigDecimal discountPrice;
 
+    // trade price — admin-only, never exposed on public endpoints
+    @Column(name = "wholesale_price")
+    private BigDecimal wholesalePrice;
+
     @Column(name = "stock_quantity", nullable = false)
     @Builder.Default
     private Integer stockQuantity = 0;

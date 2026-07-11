@@ -19,6 +19,7 @@ public final class CatalogDtos {
             String description, String shortDescription,
             Long categoryId, Long brandId,
             BigDecimal price, BigDecimal discountPrice,
+            BigDecimal wholesalePrice, // populated on admin endpoints only
             Integer stockQuantity, Integer lowStockLimit,
             BigDecimal rating, String status, Boolean isFeatured,
             List<ImageDto> images, List<AttributeDto> attributes
@@ -42,6 +43,7 @@ public final class CatalogDtos {
             Long brandId,
             @NotNull @PositiveOrZero BigDecimal price,
             BigDecimal discountPrice,
+            BigDecimal wholesalePrice,
             @NotNull @PositiveOrZero Integer stockQuantity,
             Integer lowStockLimit,
             Boolean isFeatured,

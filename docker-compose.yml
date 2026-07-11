@@ -31,6 +31,9 @@ services:
       APP_JWT_SECRET: ${APP_JWT_SECRET:-change-me-in-production-this-must-be-at-least-256-bits-long-secret}
       APP_CORS_ORIGINS: ${APP_CORS_ORIGINS:-http://localhost:3000}
       APP_UPLOADS_DIR: /app/uploads
+      APP_ADMIN_EMAIL: ${APP_ADMIN_EMAIL:-}
+      APP_ADMIN_PASSWORD: ${APP_ADMIN_PASSWORD:-}
+      APP_DELIVERY_FEE: ${APP_DELIVERY_FEE:-50}
     volumes:
       - tattoo_uploads:/app/uploads
     ports:

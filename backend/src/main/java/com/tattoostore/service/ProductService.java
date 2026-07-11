@@ -89,7 +89,7 @@ public class ProductService {
     public ProductResponse create(ProductRequest req) {
         Product product = new Product();
         apply(product, req);
-        return toResponse(productRepository.save(product));
+        return toResponse(productRepository.save(product), true);
     }
 
     @Transactional
@@ -97,7 +97,7 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> ApiException.notFound("Product not found"));
         apply(product, req);
-        return toResponse(productRepository.save(product));
+        return toResponse(productRepository.save(product), true);
     }
 
     @Transactional
@@ -111,13 +111,13 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> ApiException.notFound("Product not found"));
         product.setStatus(status);
-        return toResponse(productRepository.save(product));
+        return toResponse(productRepository.save(product), true);
     }
 
     public PageResponse<ProductResponse> adminList(int page, int size) {
         return PageResponse.of(productRepository
                 .findAll(PageRequest.of(page, size, Sort.by("id").descending()))
-                .map(this::toResponse));
+                .map(p -> toResponse(p, true)));
     }
 
     // ---------- mapping ----------
@@ -133,6 +133,7 @@ public class ProductService {
         product.setBrandId(req.brandId());
         product.setPrice(req.price());
         product.setDiscountPrice(req.discountPrice());
+        product.setWholesalePrice(req.wholesalePrice());
         product.setStockQuantity(req.stockQuantity());
         if (req.lowStockLimit() != null) product.setLowStockLimit(req.lowStockLimit());
         if (req.isFeatured() != null) product.setIsFeatured(req.isFeatured());
@@ -174,12 +175,18 @@ public class ProductService {
                 p.getIsFeatured(), primaryImage(p));
     }
 
+    /** Public mapping — wholesale price stays hidden. */
     private ProductResponse toResponse(Product p) {
+        return toResponse(p, false);
+    }
+
+    private ProductResponse toResponse(Product p, boolean includeWholesale) {
         return new ProductResponse(
                 p.getId(), p.getName(), p.getSlug(), p.getSku(),
                 p.getDescription(), p.getShortDescription(),
                 p.getCategoryId(), p.getBrandId(),
                 p.getPrice(), p.getDiscountPrice(),
+                includeWholesale ? p.getWholesalePrice() : null,
                 p.getStockQuantity(), p.getLowStockLimit(),
                 p.getRating(), p.getStatus(), p.getIsFeatured(),
                 p.getImages().stream().map(i -> new ImageDto(i.getId(), i.getImageUrl(), i.getSortOrder())).toList(),

@@ -38,8 +38,11 @@ app:
   uploads:
     dir: ${APP_UPLOADS_DIR:uploads}
   store:
-    currency: KWD
-    default-delivery-fee: 2.000
+    currency: ${APP_CURRENCY:EGP}
+    default-delivery-fee: ${APP_DELIVERY_FEE:50}
+  admin:
+    email: ${APP_ADMIN_EMAIL:}
+    password: ${APP_ADMIN_PASSWORD:}
 
 springdoc:
   swagger-ui:

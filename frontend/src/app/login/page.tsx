@@ -104,7 +104,7 @@ function LoginForm() {
             <Input
               label="Phone"
               type="tel"
-              placeholder="+965 …"
+              placeholder="+20 …"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />

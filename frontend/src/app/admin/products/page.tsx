@@ -28,6 +28,7 @@ interface AdminProduct {
   brandId?: number;
   price: number;
   discountPrice?: number | null;
+  wholesalePrice?: number | null;
   stockQuantity: number;
   lowStockLimit?: number;
   status: string;
@@ -62,6 +63,7 @@ const emptyForm = {
   brandId: "",
   price: "",
   discountPrice: "",
+  wholesalePrice: "",
   stockQuantity: "0",
   status: "ACTIVE",
   isFeatured: false,
@@ -298,6 +300,7 @@ function ProductFormModal({
           brandId: product.brandId?.toString() ?? "",
           price: product.price.toString(),
           discountPrice: product.discountPrice?.toString() ?? "",
+          wholesalePrice: product.wholesalePrice?.toString() ?? "",
           stockQuantity: product.stockQuantity.toString(),
           status: product.status,
           isFeatured: Boolean(product.isFeatured),
@@ -358,6 +361,7 @@ function ProductFormModal({
       brandId: form.brandId ? Number(form.brandId) : null,
       price: Number(form.price),
       discountPrice: form.discountPrice ? Number(form.discountPrice) : null,
+      wholesalePrice: form.wholesalePrice ? Number(form.wholesalePrice) : null,
       stockQuantity: Number(form.stockQuantity),
       status: form.status,
       isFeatured: form.isFeatured,
@@ -445,7 +449,7 @@ function ProductFormModal({
                 ))}
               </select>
             </Field>
-            <Field label="Price (KWD) *">
+            <Field label="Price (EGP) *">
               <input
                 required
                 type="number"
@@ -463,6 +467,16 @@ function ProductFormModal({
                 min="0"
                 value={form.discountPrice}
                 onChange={(e) => set("discountPrice", e.target.value)}
+                className="input"
+              />
+            </Field>
+            <Field label="Wholesale price (admin only)">
+              <input
+                type="number"
+                step="0.001"
+                min="0"
+                value={form.wholesalePrice}
+                onChange={(e) => set("wholesalePrice", e.target.value)}
                 className="input"
               />
             </Field>

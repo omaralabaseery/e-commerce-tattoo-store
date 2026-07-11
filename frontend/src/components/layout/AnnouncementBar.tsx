@@ -11,7 +11,7 @@ export function AnnouncementBar() {
   return (
     <div className="relative z-50 bg-ink text-paper">
       <div className="container-site flex h-9 items-center justify-center gap-2 text-center text-xs font-medium tracking-wide">
-        <span>Free express delivery on orders over 50 KWD · Authentic professional supplies</span>
+        <span>Free express delivery on orders over 2,000 EGP · Authentic professional supplies</span>
         <button
           aria-label="Dismiss"
           onClick={() => setOpen(false)}

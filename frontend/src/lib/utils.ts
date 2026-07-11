@@ -5,10 +5,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-const CURRENCY = "KWD";
+const CURRENCY = "EGP";
 
 export function formatPrice(value: number): string {
-  return `${value.toFixed(3)} ${CURRENCY}`;
+  return `${value.toLocaleString("en-EG", { maximumFractionDigits: 2 })} ${CURRENCY}`;
 }
 
 export function discountPercent(price: number, discount?: number | null): number | null {
