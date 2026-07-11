@@ -67,14 +67,17 @@ public class Product {
     @Builder.Default
     private Boolean isFeatured = false;
 
+    // nullable=false makes Hibernate include the FK in the child INSERT itself —
+    // without it, children are inserted with product_id=null (then updated),
+    // which violates the NOT NULL constraint in the schema
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "product_id", nullable = false)
     @OrderBy("sortOrder ASC")
     @Builder.Default
     private List<ProductImage> images = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "product_id", nullable = false)
     @Builder.Default
     private List<ProductAttribute> attributes = new ArrayList<>();
 
