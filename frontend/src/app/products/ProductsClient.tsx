@@ -22,9 +22,18 @@ export function ProductsClient({
   const initialCategory = params.get("category") ? Number(params.get("category")) : null;
   const initialSort = (params.get("sort") as Sort) || "featured";
 
+  // Derive the slider ceiling from the actual catalog so it adapts to the
+  // store's currency/price range (rounded up to a clean step).
+  const priceCeiling = useMemo(() => {
+    const top = products.reduce((m, p) => Math.max(m, p.discountPrice ?? p.price), 0);
+    const step = top > 5000 ? 1000 : top > 1000 ? 500 : 50;
+    return Math.max(step, Math.ceil(top / step) * step);
+  }, [products]);
+  const sliderStep = priceCeiling > 5000 ? 500 : priceCeiling > 1000 ? 100 : 10;
+
   const [category, setCategory] = useState<number | null>(initialCategory);
   const [brand, setBrand] = useState<number | null>(null);
-  const [maxPrice, setMaxPrice] = useState<number>(500);
+  const [maxPrice, setMaxPrice] = useState<number>(priceCeiling);
   const [inStock, setInStock] = useState(false);
   const [minRating, setMinRating] = useState(0);
   const [sort, setSort] = useState<Sort>(initialSort);
@@ -58,7 +67,7 @@ export function ProductsClient({
   const reset = () => {
     setCategory(null);
     setBrand(null);
-    setMaxPrice(500);
+    setMaxPrice(priceCeiling);
     setInStock(false);
     setMinRating(0);
   };
@@ -106,13 +115,13 @@ export function ProductsClient({
 
       <div>
         <h3 className="mb-3 text-xs font-medium uppercase tracking-wide text-muted">
-          Max price: {maxPrice} EGP
+          Max price: {maxPrice.toLocaleString()} EGP
         </h3>
         <input
           type="range"
-          min={10}
-          max={500}
-          step={10}
+          min={0}
+          max={priceCeiling}
+          step={sliderStep}
           value={maxPrice}
           onChange={(e) => setMaxPrice(Number(e.target.value))}
           className="w-full accent-ink"
