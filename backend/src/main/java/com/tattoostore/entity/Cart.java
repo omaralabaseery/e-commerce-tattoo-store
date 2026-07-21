@@ -21,8 +21,10 @@ public class Cart {
     @Column(name = "session_id")
     private String sessionId;
 
+    // nullable=false so the FK is written in the child INSERT (avoids a
+    // null-then-update that the NOT NULL constraint would reject).
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "cart_id")
+    @JoinColumn(name = "cart_id", nullable = false)
     @Builder.Default
     private List<CartItem> items = new ArrayList<>();
 

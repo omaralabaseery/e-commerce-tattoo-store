@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, CreditCard, Banknote, Smartphone, Wallet } from "lucide-react";
@@ -12,7 +12,7 @@ import type { PaymentMethod } from "@/lib/types";
 const STEPS = ["Address", "Shipping", "Payment", "Review"] as const;
 type Step = (typeof STEPS)[number];
 
-const DELIVERY_FEE = 2;
+const DEFAULT_DELIVERY_FEE = 50;
 
 const PAYMENTS: { id: PaymentMethod; label: string; icon: typeof CreditCard }[] = [
   { id: "KNET", label: "KNET", icon: Wallet },
@@ -43,9 +43,27 @@ export function CheckoutClient() {
   const [address, setAddress] = useState(emptyAddress);
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deliveryFee, setDeliveryFee] = useState(DEFAULT_DELIVERY_FEE);
+  const [freeThreshold, setFreeThreshold] = useState<number | null>(null);
+
+  // Mirror the backend's delivery-fee rules (managed in admin Settings) so the
+  // summary matches what the order is actually charged.
+  useEffect(() => {
+    if (!apiEnabled) return;
+    api<Record<string, string>>("/api/settings")
+      .then((s) => {
+        if (s.deliveryFee) setDeliveryFee(Number(s.deliveryFee));
+        setFreeThreshold(s.freeDeliveryThreshold ? Number(s.freeDeliveryThreshold) : null);
+      })
+      .catch(() => undefined);
+  }, []);
 
   const stepIndex = step;
-  const total = subtotal + (items.length ? DELIVERY_FEE : 0);
+  const delivery =
+    items.length === 0 || (freeThreshold != null && freeThreshold > 0 && subtotal >= freeThreshold)
+      ? 0
+      : deliveryFee;
+  const total = subtotal + delivery;
 
   const setAddr = (key: keyof typeof emptyAddress) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setAddress((a) => ({ ...a, [key]: e.target.value }));
@@ -259,7 +277,7 @@ export function CheckoutClient() {
           <h2 className="text-sm font-semibold uppercase tracking-wide">Order Summary</h2>
           <div className="mt-4 space-y-2.5 text-sm">
             <Row label="Subtotal" value={formatPrice(subtotal)} />
-            <Row label="Delivery" value={formatPrice(DELIVERY_FEE)} />
+            <Row label="Delivery" value={delivery === 0 ? "Free" : formatPrice(delivery)} />
             <div className="my-3 h-px bg-line" />
             <Row label="Total" value={formatPrice(total)} bold />
           </div>

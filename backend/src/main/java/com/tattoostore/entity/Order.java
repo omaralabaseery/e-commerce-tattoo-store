@@ -67,8 +67,11 @@ public class Order {
 
     private String notes;
 
+    // nullable=false makes Hibernate write order_id in the child INSERT itself,
+    // instead of inserting with a null FK then updating (which the NOT NULL
+    // constraint rejects).
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "order_id", nullable = false)
     @Builder.Default
     private List<OrderItem> items = new ArrayList<>();
 
