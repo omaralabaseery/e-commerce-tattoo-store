@@ -37,9 +37,7 @@ public class OrderService {
     private final CouponRepository couponRepository;
     private final InventoryTransactionRepository inventoryRepository;
     private final CurrentUser currentUser;
-
-    @Value("${app.store.default-delivery-fee}")
-    private BigDecimal defaultDeliveryFee;
+    private final SettingsService settingsService;
 
     @Transactional
     public OrderResponse create(CreateOrderRequest req) {
@@ -54,7 +52,7 @@ public class OrderService {
                 .addressId(req.addressId())
                 .paymentMethod(req.paymentMethod())
                 .notes(req.notes())
-                .deliveryFee(defaultDeliveryFee)
+                .deliveryFee(settingsService.getDeliveryFee())
                 .build();
 
         BigDecimal subtotal = BigDecimal.ZERO;
@@ -91,6 +89,12 @@ public class OrderService {
         }
 
         BigDecimal discount = applyCoupon(req.couponCode(), subtotal, order);
+        // free delivery once the subtotal clears the configured threshold
+        BigDecimal freeThreshold = settingsService.getFreeDeliveryThreshold();
+        if (freeThreshold != null && freeThreshold.signum() > 0
+                && subtotal.compareTo(freeThreshold) >= 0) {
+            order.setDeliveryFee(BigDecimal.ZERO);
+        }
         order.setSubtotal(subtotal);
         order.setDiscountAmount(discount);
         order.setTotalAmount(subtotal.subtract(discount).add(order.getDeliveryFee())

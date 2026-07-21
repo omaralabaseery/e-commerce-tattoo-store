@@ -48,4 +48,9 @@ public class AdminProductController {
     public ProductResponse setStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
         return productService.setStatus(id, body.getOrDefault("status", "ACTIVE"));
     }
+
+    @PatchMapping("/{id}/stock")
+    public ProductResponse setStock(@PathVariable Long id, @RequestBody Map<String, Integer> body) {
+        return productService.setStock(id, body.getOrDefault("stockQuantity", 0));
+    }
 }

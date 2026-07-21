@@ -117,6 +117,15 @@ public class ProductService {
         return toResponse(productRepository.save(product), true);
     }
 
+    /** Sets absolute stock quantity (used by the Inventory dashboard). */
+    @Transactional
+    public ProductResponse setStock(Long id, int stockQuantity) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> ApiException.notFound("Product not found"));
+        product.setStockQuantity(Math.max(0, stockQuantity));
+        return toResponse(productRepository.save(product), true);
+    }
+
     public PageResponse<ProductResponse> adminList(int page, int size) {
         return PageResponse.of(productRepository
                 .findAll(PageRequest.of(page, size, Sort.by("id").descending()))
