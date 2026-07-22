@@ -19,9 +19,17 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final BrandRepository brandRepository;
+    private final TranslationService translationService;
 
-    public List<CategoryResponse> listCategories() {
-        return categoryRepository.findAll().stream().map(this::toResponse).toList();
+    public List<CategoryResponse> listCategories(String lang) {
+        return categoryRepository.findAll().stream()
+                .map(c -> localize(toResponse(c), lang)).toList();
+    }
+
+    private CategoryResponse localize(CategoryResponse r, String lang) {
+        if (lang == null || lang.isBlank()) return r;
+        return new CategoryResponse(r.id(), translationService.translate(r.name(), lang),
+                r.slug(), r.parentId(), r.imageUrl(), r.status());
     }
 
     public List<BrandResponse> listBrands() {

@@ -37,6 +37,8 @@ app:
     origins: ${APP_CORS_ORIGINS:http://localhost:3000}
   uploads:
     dir: ${APP_UPLOADS_DIR:uploads}
+  translate:
+    region: ${AWS_REGION:eu-central-1}
   store:
     currency: ${APP_CURRENCY:EGP}
     default-delivery-fee: ${APP_DELIVERY_FEE:50}

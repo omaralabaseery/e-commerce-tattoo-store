@@ -30,6 +30,7 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final TranslationService translationService;
 
     // ---------- Public catalog ----------
 
@@ -37,7 +38,7 @@ public class ProductService {
                                              BigDecimal minPrice, BigDecimal maxPrice,
                                              Boolean inStock, BigDecimal minRating,
                                              String search, String sort,
-                                             int page, int size) {
+                                             int page, int size, String lang) {
         Specification<Product> spec = (root, query, cb) -> {
             List<Predicate> p = new ArrayList<>();
             p.add(cb.equal(root.get("status"), "ACTIVE"));
@@ -65,22 +66,22 @@ public class ProductService {
         };
 
         Page<Product> result = productRepository.findAll(spec, PageRequest.of(page, size, sortBy));
-        return PageResponse.of(result.map(this::toSummary));
+        return PageResponse.of(result.map(p -> localize(toSummary(p), lang)));
     }
 
-    public ProductResponse getBySlugOrId(String slugOrId) {
+    public ProductResponse getBySlugOrId(String slugOrId, String lang) {
         Product product = resolve(slugOrId);
-        return toResponse(product);
+        return localize(toResponse(product), lang);
     }
 
-    public List<ProductSummary> featured() {
+    public List<ProductSummary> featured(String lang) {
         return productRepository.findByIsFeaturedTrueAndStatus("ACTIVE")
-                .stream().map(this::toSummary).toList();
+                .stream().map(p -> localize(toSummary(p), lang)).toList();
     }
 
-    public List<ProductSummary> newArrivals() {
+    public List<ProductSummary> newArrivals(String lang) {
         return productRepository.findTop8ByStatusOrderByCreatedAtDesc("ACTIVE")
-                .stream().map(this::toSummary).toList();
+                .stream().map(p -> localize(toSummary(p), lang)).toList();
     }
 
     // ---------- Admin ----------
@@ -185,6 +186,29 @@ public class ProductService {
                 p.getCategoryId(), p.getBrandId(), p.getPrice(),
                 p.getDiscountPrice(), p.getRating(), p.getStockQuantity(),
                 p.getIsFeatured(), primaryImage(p));
+    }
+
+    // ---------- translation ----------
+
+    private ProductSummary localize(ProductSummary s, String lang) {
+        if (lang == null || lang.isBlank()) return s;
+        return new ProductSummary(s.id(), translationService.translate(s.name(), lang), s.slug(),
+                s.categoryId(), s.brandId(), s.price(), s.discountPrice(),
+                s.rating(), s.stockQuantity(), s.isFeatured(), s.imageUrl());
+    }
+
+    private ProductResponse localize(ProductResponse r, String lang) {
+        if (lang == null || lang.isBlank()) return r;
+        var attrs = r.attributes().stream().map(a -> new AttributeDto(
+                translationService.translate(a.name(), lang),
+                translationService.translate(a.value(), lang))).toList();
+        return new ProductResponse(r.id(),
+                translationService.translate(r.name(), lang), r.slug(), r.sku(),
+                translationService.translate(r.description(), lang),
+                translationService.translate(r.shortDescription(), lang),
+                r.categoryId(), r.brandId(), r.price(), r.discountPrice(), r.wholesalePrice(),
+                r.stockQuantity(), r.lowStockLimit(), r.rating(), r.status(), r.isFeatured(),
+                r.images(), attrs);
     }
 
     /** Public mapping — wholesale price stays hidden. */

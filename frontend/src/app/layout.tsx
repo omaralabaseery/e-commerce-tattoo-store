@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Cairo } from "next/font/google";
+import { cookies } from "next/headers";
 import "./globals.css";
 import { StoreChrome } from "@/components/layout/StoreChrome";
+import { normalizeLang, dirFor } from "@/lib/i18n";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const cairo = Cairo({ subsets: ["arabic", "latin"], variable: "--font-cairo", display: "swap" });
@@ -26,8 +28,9 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const lang = normalizeLang(cookies().get("lang")?.value);
   return (
-    <html lang="en" className={`${inter.variable} ${cairo.variable}`}>
+    <html lang={lang} dir={dirFor(lang)} className={`${inter.variable} ${cairo.variable}`}>
       <body className="min-h-screen">
         <StoreChrome>{children}</StoreChrome>
       </body>

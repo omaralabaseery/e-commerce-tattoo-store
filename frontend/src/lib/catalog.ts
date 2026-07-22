@@ -98,10 +98,13 @@ function fromDetail(p: ApiProductDetail): Product {
   };
 }
 
-export async function getCategories(): Promise<Category[]> {
+/** `&lang=ar` query suffix when a non-default language is selected. */
+const langQuery = (lang?: string) => (lang && lang !== "en" ? `&lang=${lang}` : "");
+
+export async function getCategories(lang?: string): Promise<Category[]> {
   if (!apiEnabled) return mockCategories;
   try {
-    return await api<Category[]>("/api/categories", cached);
+    return await api<Category[]>(`/api/categories?_${langQuery(lang)}`, cached);
   } catch {
     return [];
   }
@@ -117,11 +120,11 @@ export async function getBrands(): Promise<Brand[]> {
 }
 
 /** Full active catalog (used for client-side filtering / search). */
-export async function getProducts(): Promise<Product[]> {
+export async function getProducts(lang?: string): Promise<Product[]> {
   if (!apiEnabled) return mockProducts;
   try {
     const res = await api<ApiPage<ApiProductSummary>>(
-      "/api/products?page=0&size=200",
+      `/api/products?page=0&size=200${langQuery(lang)}`,
       cached
     );
     return res.content.map(fromSummary);
@@ -131,44 +134,46 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 /** react cache(): generateMetadata + the page component share one fetch per request. */
-export const getProductBySlug = cache(async (slug: string): Promise<Product | null> => {
-  if (!apiEnabled) return getMockProduct(slug) ?? null;
-  try {
-    const res = await api<ApiProductDetail>(
-      `/api/products/${encodeURIComponent(slug)}`,
-      cached
-    );
-    return fromDetail(res);
-  } catch {
-    return null;
+export const getProductBySlug = cache(
+  async (slug: string, lang?: string): Promise<Product | null> => {
+    if (!apiEnabled) return getMockProduct(slug) ?? null;
+    try {
+      const res = await api<ApiProductDetail>(
+        `/api/products/${encodeURIComponent(slug)}?_${langQuery(lang)}`,
+        cached
+      );
+      return fromDetail(res);
+    } catch {
+      return null;
+    }
   }
-});
+);
 
-export async function getFeatured(): Promise<Product[]> {
+export async function getFeatured(lang?: string): Promise<Product[]> {
   if (!apiEnabled) return mockFeatured;
   try {
-    const res = await api<ApiProductSummary[]>("/api/products/featured", cached);
+    const res = await api<ApiProductSummary[]>(`/api/products/featured?_${langQuery(lang)}`, cached);
     return res.map(fromSummary);
   } catch {
     return [];
   }
 }
 
-export async function getNewArrivals(): Promise<Product[]> {
+export async function getNewArrivals(lang?: string): Promise<Product[]> {
   if (!apiEnabled) return [...mockProducts].slice(-8).reverse();
   try {
-    const res = await api<ApiProductSummary[]>("/api/products/new-arrivals", cached);
+    const res = await api<ApiProductSummary[]>(`/api/products/new-arrivals?_${langQuery(lang)}`, cached);
     return res.map(fromSummary);
   } catch {
     return [];
   }
 }
 
-export async function getBestSellers(): Promise<Product[]> {
+export async function getBestSellers(lang?: string): Promise<Product[]> {
   if (!apiEnabled) return mockBestSellers;
   try {
     const res = await api<ApiPage<ApiProductSummary>>(
-      "/api/products?sort=rating&page=0&size=8",
+      `/api/products?sort=rating&page=0&size=8${langQuery(lang)}`,
       cached
     );
     return res.content.map(fromSummary);
@@ -177,7 +182,7 @@ export async function getBestSellers(): Promise<Product[]> {
   }
 }
 
-export async function getRelatedProducts(product: Product): Promise<Product[]> {
+export async function getRelatedProducts(product: Product, lang?: string): Promise<Product[]> {
   if (!apiEnabled) {
     const others = mockProducts.filter((p) => p.id !== product.id);
     const same = others.filter(
@@ -187,8 +192,8 @@ export async function getRelatedProducts(product: Product): Promise<Product[]> {
   }
   try {
     const query = product.categoryId
-      ? `/api/products?categoryId=${product.categoryId}&page=0&size=5`
-      : "/api/products?page=0&size=5";
+      ? `/api/products?categoryId=${product.categoryId}&page=0&size=5${langQuery(lang)}`
+      : `/api/products?page=0&size=5${langQuery(lang)}`;
     const res = await api<ApiPage<ApiProductSummary>>(query, cached);
     return res.content
       .map(fromSummary)

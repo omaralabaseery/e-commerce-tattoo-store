@@ -34,6 +34,10 @@ services:
       APP_ADMIN_EMAIL: ${APP_ADMIN_EMAIL:-}
       APP_ADMIN_PASSWORD: ${APP_ADMIN_PASSWORD:-}
       APP_DELIVERY_FEE: ${APP_DELIVERY_FEE:-50}
+      # Amazon Translate (optional — translation is disabled if unset)
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_REGION: ${AWS_REGION:-eu-central-1}
     volumes:
       - tattoo_uploads:/app/uploads
     ports:

@@ -7,6 +7,7 @@ import { Search, CornerDownLeft } from "lucide-react";
 import { products as mockProducts } from "@/data/mock";
 import type { Product } from "@/lib/types";
 import { api, apiEnabled, imageSrc } from "@/lib/api";
+import { getClientLang } from "@/lib/i18n";
 import { ProductImage } from "@/components/ui/ProductImage";
 import { formatPrice } from "@/lib/utils";
 
@@ -55,9 +56,10 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
 
     // debounce live search against the API
     const seq = ++requestSeq.current;
+    const lang = getClientLang();
     const t = setTimeout(() => {
       api<{ content: ApiSummary[] }>(
-        `/api/products?search=${encodeURIComponent(q)}&page=0&size=6`
+        `/api/products?search=${encodeURIComponent(q)}&page=0&size=6${lang !== "en" ? `&lang=${lang}` : ""}`
       )
         .then((res) => {
           // ignore out-of-order responses from older queries

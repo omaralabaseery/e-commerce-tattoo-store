@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { products as mockProducts } from "@/data/mock";
 import type { Product } from "@/lib/types";
 import { api, apiEnabled, imageSrc } from "@/lib/api";
+import { getClientLang } from "@/lib/i18n";
 import { ProductGrid } from "@/components/sections/ProductGrid";
 
 interface ApiSummary {
@@ -46,10 +47,12 @@ export default function SearchPage() {
   useEffect(() => {
     if (!apiEnabled) return;
     const seq = ++requestSeq.current;
+    const lang = getClientLang();
+    const langSuffix = lang !== "en" ? `&lang=${lang}` : "";
     const t = setTimeout(() => {
       const query = q.trim()
-        ? `/api/products?search=${encodeURIComponent(q.trim())}&page=0&size=48`
-        : "/api/products?page=0&size=48";
+        ? `/api/products?search=${encodeURIComponent(q.trim())}&page=0&size=48${langSuffix}`
+        : `/api/products?page=0&size=48${langSuffix}`;
       api<{ content: ApiSummary[] }>(query)
         // ignore out-of-order responses from older queries
         .then((res) => {

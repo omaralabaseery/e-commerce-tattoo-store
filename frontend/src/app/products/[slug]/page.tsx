@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import type { Metadata } from "next";
 import { getProductBySlug, getRelatedProducts } from "@/lib/catalog";
+import { normalizeLang } from "@/lib/i18n";
 import { ProductDetailClient } from "./ProductDetailClient";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +12,8 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const product = await getProductBySlug(params.slug);
+  const lang = normalizeLang(cookies().get("lang")?.value);
+  const product = await getProductBySlug(params.slug, lang);
   if (!product) return { title: "Product not found" };
   return {
     title: product.name,
@@ -19,8 +22,9 @@ export async function generateMetadata({
 }
 
 export default async function ProductDetailPage({ params }: { params: { slug: string } }) {
-  const product = await getProductBySlug(params.slug);
+  const lang = normalizeLang(cookies().get("lang")?.value);
+  const product = await getProductBySlug(params.slug, lang);
   if (!product) notFound();
-  const related = await getRelatedProducts(product);
+  const related = await getRelatedProducts(product, lang);
   return <ProductDetailClient product={product} related={related} />;
 }

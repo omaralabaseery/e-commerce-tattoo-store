@@ -8,6 +8,7 @@ import { useCart } from "@/lib/store";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { SearchModal } from "@/components/search/SearchModal";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -78,6 +79,7 @@ export function Header() {
           </nav>
 
           <div className="flex items-center gap-1.5">
+            <LanguageSwitcher />
             <button
               aria-label="Search"
               onClick={() => setSearchOpen(true)}

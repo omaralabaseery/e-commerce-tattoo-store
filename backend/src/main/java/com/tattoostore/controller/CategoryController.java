@@ -16,8 +16,8 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping("/api/categories")
-    public List<CategoryResponse> categories() {
-        return categoryService.listCategories();
+    public List<CategoryResponse> categories(@RequestParam(required = false) String lang) {
+        return categoryService.listCategories(lang);
     }
 
     @GetMapping("/api/brands")
