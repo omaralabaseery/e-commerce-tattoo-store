@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
-import { useAuth } from "@/lib/auth";
+import { useAdminAuth } from "@/lib/auth";
 
 export function AdminUserBadge() {
-  const { user, logout } = useAuth();
+  const { user, logout } = useAdminAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
 

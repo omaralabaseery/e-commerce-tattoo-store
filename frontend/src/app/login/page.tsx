@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { cn } from "@/lib/utils";
 import { apiEnabled } from "@/lib/api";
-import { useAuth, isAdminRole } from "@/lib/auth";
+import { useAuth, useAdminAuth, isAdminRole, authenticate, registerCustomer } from "@/lib/auth";
 
 export default function LoginPage() {
   return (
@@ -27,8 +27,8 @@ function LoginForm() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const login = useAuth((s) => s.login);
-  const register = useAuth((s) => s.register);
+  const setCustomerSession = useAuth((s) => s.setSession);
+  const setAdminSession = useAdminAuth((s) => s.setSession);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -41,17 +41,23 @@ function LoginForm() {
 
     setLoading(true);
     try {
-      const user =
+      const res =
         mode === "login"
-          ? await login(email, password)
-          : await register({ name, email, phone: phone || undefined, password });
+          ? await authenticate(email, password)
+          : await registerCustomer({ name, email, phone: phone || undefined, password });
+
+      // Admin accounts populate the (separate) admin session; customers the
+      // storefront session — so signing in on one side never ends the other.
+      const admin = isAdminRole(res.user.role);
+      if (admin) setAdminSession(res);
+      else setCustomerSession(res);
 
       // only same-site relative paths — never external URLs from the query string
       const redirect = searchParams.get("redirect");
       const safeRedirect =
         redirect && redirect.startsWith("/") && !redirect.startsWith("//") ? redirect : null;
       if (safeRedirect) router.push(safeRedirect);
-      else if (isAdminRole(user.role)) router.push("/admin");
+      else if (admin) router.push("/admin");
       else router.push("/account");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

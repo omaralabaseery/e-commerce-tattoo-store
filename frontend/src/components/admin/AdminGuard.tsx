@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { apiEnabled } from "@/lib/api";
-import { useAuth, isAdminRole } from "@/lib/auth";
+import { useAdminAuth, isAdminRole } from "@/lib/auth";
 
 /**
  * Client-side gate for /admin pages: requires a signed-in user with an admin
@@ -11,7 +11,7 @@ import { useAuth, isAdminRole } from "@/lib/auth";
  * this only keeps non-admins out of the UI.
  */
 export function AdminGuard({ children }: { children: React.ReactNode }) {
-  const { user, hydrated } = useAuth();
+  const { user, hydrated } = useAdminAuth();
   const router = useRouter();
 
   // Without a configured API there is nothing to authenticate against (mock mode).

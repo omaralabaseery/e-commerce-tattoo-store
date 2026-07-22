@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { api, storeTokens } from "@/lib/api";
+import { api, storeTokens, readRefreshToken, type Scope } from "@/lib/api";
 
 export interface AuthUser {
   id: number;
@@ -11,7 +11,7 @@ export interface AuthUser {
   role: string;
 }
 
-interface AuthResponse {
+export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
   tokenType: string;
@@ -35,62 +35,68 @@ interface AuthState {
   /** true once the persisted state has been rehydrated on the client */
   hydrated: boolean;
   setHydrated: () => void;
-  login: (email: string, password: string) => Promise<AuthUser>;
-  register: (data: {
-    name: string;
-    email: string;
-    phone?: string;
-    password: string;
-  }) => Promise<AuthUser>;
+  setSession: (res: AuthResponse) => void;
   logout: () => Promise<void>;
 }
 
-export const useAuth = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
-      hydrated: false,
-      setHydrated: () => set({ hydrated: true }),
+function createAuthStore(scope: Scope, persistName: string) {
+  return create<AuthState>()(
+    persist(
+      (set) => ({
+        user: null,
+        hydrated: false,
+        setHydrated: () => set({ hydrated: true }),
 
-      login: async (email, password) => {
-        const res = await api<AuthResponse>("/api/auth/login", {
-          method: "POST",
-          body: JSON.stringify({ email, password }),
-        });
-        storeTokens(res.accessToken, res.refreshToken);
-        set({ user: res.user });
-        return res.user;
-      },
+        setSession: (res) => {
+          storeTokens(res.accessToken, res.refreshToken, scope);
+          set({ user: res.user });
+        },
 
-      register: async (data) => {
-        const res = await api<AuthResponse>("/api/auth/register", {
-          method: "POST",
-          body: JSON.stringify(data),
-        });
-        storeTokens(res.accessToken, res.refreshToken);
-        set({ user: res.user });
-        return res.user;
-      },
+        logout: async () => {
+          const refreshToken = readRefreshToken(scope);
+          if (refreshToken) {
+            await api("/api/auth/logout", {
+              method: "POST",
+              body: JSON.stringify({ refreshToken }),
+            }).catch(() => undefined);
+          }
+          storeTokens(null, null, scope);
+          set({ user: null });
+        },
+      }),
+      {
+        name: persistName,
+        partialize: (s) => ({ user: s.user }),
+        onRehydrateStorage: () => (state) => {
+          state?.setHydrated();
+        },
+      }
+    )
+  );
+}
 
-      logout: async () => {
-        const refreshToken =
-          typeof window !== "undefined" ? localStorage.getItem("refreshToken") : null;
-        if (refreshToken) {
-          await api("/api/auth/logout", {
-            method: "POST",
-            body: JSON.stringify({ refreshToken }),
-          }).catch(() => undefined);
-        }
-        storeTokens(null, null);
-        set({ user: null });
-      },
-    }),
-    {
-      name: "tattoo-auth",
-      partialize: (s) => ({ user: s.user }),
-      onRehydrateStorage: () => (state) => {
-        state?.setHydrated();
-      },
-    }
-  )
-);
+/** Storefront shopper session. */
+export const useAuth = createAuthStore("customer", "tattoo-auth");
+
+/** Admin dashboard session — independent from the storefront session. */
+export const useAdminAuth = createAuthStore("admin", "tattoo-auth-admin");
+
+/** Authenticate without storing anything — the caller routes tokens to a scope by role. */
+export async function authenticate(email: string, password: string): Promise<AuthResponse> {
+  return api<AuthResponse>("/api/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export async function registerCustomer(data: {
+  name: string;
+  email: string;
+  phone?: string;
+  password: string;
+}): Promise<AuthResponse> {
+  return api<AuthResponse>("/api/auth/register", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
