@@ -26,7 +26,7 @@ export default function Page() {
       <p>Dispose of needles and cartridges in approved sharps containers in line with local regulations.</p>
       <h2>Disclaimer</h2>
       <p>
-        Tattoo Store provides supplies, not medical advice. You are responsible for safe, compliant, and
+        Ghazak3ndna provides supplies, not medical advice. You are responsible for safe, compliant, and
         hygienic practice.
       </p>
     </PageShell>

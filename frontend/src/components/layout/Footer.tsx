@@ -43,8 +43,12 @@ export function Footer() {
       <div className="container-site py-14">
         <div className="grid gap-10 md:grid-cols-5">
           <div className="md:col-span-1">
-            <Link href="/" className="text-lg font-semibold tracking-tight">
-              TATTOO<span className="text-muted">STORE</span>
+            <Link href="/" className="flex items-center gap-2.5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="Ghazak3ndna" className="h-9 w-9 rounded-full" />
+              <span className="text-lg font-semibold tracking-tight">
+                GHAZAK<span className="text-muted">3NDNA</span>
+              </span>
             </Link>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted">
               Professional tattoo equipment for serious artists. Curated, authentic, and built to last.
@@ -68,7 +72,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-line pt-6 text-xs text-muted sm:flex-row sm:items-center">
-          <p>© {new Date().getFullYear()} Tattoo Store. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Ghazak3ndna. All rights reserved.</p>
           <p className="max-w-md">
             ⚠️ Age restriction: tattoo supplies are sold to professionals and adults (18+). Always follow
             hygiene and safety guidelines.

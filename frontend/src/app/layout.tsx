@@ -8,14 +8,18 @@ const cairo = Cairo({ subsets: ["arabic", "latin"], variable: "--font-cairo", di
 
 export const metadata: Metadata = {
   title: {
-    default: "Tattoo Store — Professional Tattoo Equipment",
-    template: "%s · Tattoo Store",
+    default: "Ghazak3ndna — Professional Tattoo Equipment",
+    template: "%s · Ghazak3ndna",
   },
   description:
     "Premium tattoo supplies for serious artists — machines, ink, needles, cartridges, power supplies, grips, aftercare and kits.",
   keywords: ["tattoo machines", "tattoo ink", "tattoo needles", "tattoo cartridges", "tattoo supplies"],
+  icons: {
+    icon: "/favicon.png",
+    apple: "/apple-icon.png",
+  },
   openGraph: {
-    title: "Tattoo Store — Professional Tattoo Equipment",
+    title: "Ghazak3ndna — Professional Tattoo Equipment",
     description: "Premium tattoo supplies for serious artists.",
     type: "website",
   },

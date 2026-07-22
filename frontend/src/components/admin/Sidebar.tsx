@@ -26,9 +26,13 @@ export function Sidebar() {
 
   return (
     <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-line bg-paper px-3 py-5 lg:flex">
-      <Link href="/admin" className="px-3 text-base font-semibold tracking-tight">
-        TATTOO<span className="text-muted">STORE</span>
-        <span className="mt-0.5 block text-[10px] font-normal uppercase tracking-widest text-muted">Admin</span>
+      <Link href="/admin" className="flex items-center gap-2 px-3 text-base font-semibold tracking-tight">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.png" alt="" className="h-7 w-7 rounded-full" />
+        <span>
+          GHAZAK<span className="text-muted">3NDNA</span>
+          <span className="mt-0.5 block text-[10px] font-normal uppercase tracking-widest text-muted">Admin</span>
+        </span>
       </Link>
 
       <nav className="mt-7 flex-1 space-y-0.5">

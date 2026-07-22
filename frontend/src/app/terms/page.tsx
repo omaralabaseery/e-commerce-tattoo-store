@@ -10,7 +10,7 @@ export default function Page() {
       <h2>Pricing & Availability</h2>
       <p>Prices and stock are subject to change. We reserve the right to cancel orders affected by errors.</p>
       <h2>Liability</h2>
-      <p>Tattoo Store is not liable for misuse of products or for outcomes resulting from improper practice.</p>
+      <p>Ghazak3ndna is not liable for misuse of products or for outcomes resulting from improper practice.</p>
     </PageShell>
   );
 }

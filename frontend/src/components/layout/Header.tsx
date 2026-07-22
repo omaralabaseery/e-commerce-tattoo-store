@@ -56,8 +56,12 @@ export function Header() {
             >
               {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
-            <Link href="/" className="text-lg font-semibold tracking-tight">
-              TATTOO<span className="text-muted">STORE</span>
+            <Link href="/" className="flex items-center gap-2.5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="Ghazak3ndna" className="h-9 w-9 rounded-full" />
+              <span className="text-lg font-semibold tracking-tight">
+                GHAZAK<span className="text-muted">3NDNA</span>
+              </span>
             </Link>
           </div>
 
