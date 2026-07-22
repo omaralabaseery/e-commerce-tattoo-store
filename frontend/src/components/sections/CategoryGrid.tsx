@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import type { Category } from "@/lib/types";
+import { CategoryIcon } from "./CategoryIcon";
 import { SectionHeader } from "./SectionHeader";
 
 export function CategoryGrid({ categories }: { categories: Category[] }) {
@@ -21,10 +22,16 @@ export function CategoryGrid({ categories }: { categories: Category[] }) {
           >
             <Link
               href={`/products?category=${c.id}`}
-              className="group flex h-32 items-end justify-between overflow-hidden rounded-card border border-line bg-gradient-to-br from-mist via-white to-line p-4 transition-all duration-300 ease-premium hover:-translate-y-1 hover:shadow-lift sm:h-40"
+              className="group flex h-32 flex-col justify-between overflow-hidden rounded-card border border-line bg-gradient-to-br from-mist via-white to-line p-4 transition-all duration-300 ease-premium hover:-translate-y-1 hover:shadow-lift sm:h-40"
             >
-              <span className="text-sm font-medium">{c.name}</span>
-              <ArrowUpRight className="h-5 w-5 text-muted transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-ink" />
+              <CategoryIcon
+                slug={c.slug}
+                className="h-10 w-10 text-ink/70 transition-colors duration-300 group-hover:text-ink sm:h-12 sm:w-12"
+              />
+              <div className="flex items-end justify-between">
+                <span className="text-sm font-medium">{c.name}</span>
+                <ArrowUpRight className="h-5 w-5 text-muted transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-ink" />
+              </div>
             </Link>
           </motion.div>
         ))}

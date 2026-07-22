@@ -128,21 +128,26 @@ export function Hero() {
               style={{ x: layer1X, y: layer1Y }}
               className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 md:h-80 md:w-80"
             >
-              <div className="animate-floatY h-full w-full rounded-[28px] border border-line bg-white shadow-glass">
-                <div className="flex h-full w-full items-center justify-center rounded-[28px] bg-gradient-to-br from-mist via-white to-line">
-                  <span className="select-none text-7xl font-semibold tracking-tighter text-ink/10">TS</span>
-                </div>
+              <div className="animate-floatY h-full w-full overflow-hidden rounded-[28px] border border-line bg-white shadow-glass">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/hero-square.png" alt="Ghazak3ndna tattoo studio" className="h-full w-full object-cover" />
               </div>
             </motion.div>
 
             <motion.div
               style={{ x: layer2X, y: layer2Y }}
-              className="absolute right-4 top-6 h-24 w-24 rounded-2xl border border-line bg-white/80 shadow-soft backdrop-blur animate-floatYslow"
-            />
+              className="absolute right-4 top-6 h-24 w-24 overflow-hidden rounded-2xl border border-line bg-white shadow-soft animate-floatYslow"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/hero-mini.png" alt="" className="h-full w-full object-cover" />
+            </motion.div>
             <motion.div
               style={{ x: layer3X, y: layer3Y }}
-              className="absolute bottom-6 left-0 h-20 w-20 rounded-full border border-line bg-white/80 shadow-soft backdrop-blur animate-floatXY"
-            />
+              className="absolute bottom-6 left-0 h-20 w-20 overflow-hidden rounded-full border border-line bg-white shadow-soft animate-floatXY"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/hero-circle.png" alt="" className="h-full w-full object-cover" />
+            </motion.div>
             <motion.div
               style={{ x: layer2X, y: layer3Y }}
               className="absolute bottom-12 right-10 h-3 w-3 rounded-full bg-ink/20"
