@@ -6,24 +6,25 @@ import { ProductRail } from "@/components/sections/ProductRail";
 import { CtaBanner } from "@/components/sections/CtaBanner";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { cookies } from "next/headers";
-import { getFeatured, getNewArrivals, getBestSellers } from "@/lib/catalog";
+import { getFeatured, getNewArrivals, getBestSellers, getCategories } from "@/lib/catalog";
 import { normalizeLang } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const lang = normalizeLang(cookies().get("lang")?.value);
-  const [bestSellers, featured, newArrivals] = await Promise.all([
+  const [bestSellers, featured, newArrivals, categories] = await Promise.all([
     getBestSellers(lang),
     getFeatured(lang),
     getNewArrivals(lang),
+    getCategories(lang),
   ]);
 
   return (
     <>
       <Hero />
       <TrustBand />
-      <CategoryGrid />
+      <CategoryGrid categories={categories} />
       <ProductRail
         title="Best Sellers"
         subtitle="What professional artists reach for first."

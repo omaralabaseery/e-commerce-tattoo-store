@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
-import { categories } from "@/data/mock";
+import type { Category } from "@/lib/types";
 import { SectionHeader } from "./SectionHeader";
 
-export function CategoryGrid() {
+export function CategoryGrid({ categories }: { categories: Category[] }) {
   return (
     <section className="container-site py-20">
       <SectionHeader title="Shop by Category" subtitle="Find exactly what your craft demands." href="/products" linkLabel="All categories" />

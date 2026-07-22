@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Search, Heart, ShoppingBag, User, Menu, X } from "lucide-react";
-import { categories } from "@/data/mock";
+import type { Category } from "@/lib/types";
 import { useCart } from "@/lib/store";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { SearchModal } from "@/components/search/SearchModal";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 
-export function Header() {
+export function Header({ categories }: { categories: Category[] }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
